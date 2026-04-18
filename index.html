@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MetaPrompter</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121821;
+      --panel-2: #18202b;
+      --text: #e6edf3;
+      --muted: #9fb0c3;
+      --border: #2a3441;
+      --accent: #4ea1ff;
+      --accent-2: #7cc4ff;
+      --success: #22c55e;
+      --shadow: 0 12px 30px rgba(0,0,0,0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #0b0f14 0%, #0f141b 100%);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 18px 14px 40px;
+    }
+
+    .hero {
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.7rem;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .panel {
+      background: rgba(18, 24, 33, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0d131b;
+      color: var(--text);
+      padding: 11px 14px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      min-height: 44px;
+      transition: transform .06s ease, opacity .2s ease, border-color .2s ease;
+    }
+
+    .btn:hover { opacity: 0.96; }
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    .searchbar {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
+    }
+
+    .searchbar label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .searchbar input {
+      width: 100%;
+      background: #0d131b;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .searchbar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(78, 161, 255, 0.12);
+    }
+
+    .search-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .category-section {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .category-title {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .category-title.analyse { color: #7cc4ff; }
+    .category-title.actie { color: #fbbf24; }
+    .category-title.context { color: #c084fc; }
+    .category-title.structuur { color: #34d399; }
+
+    .category-count {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .meta-card {
+      display: grid;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: border-color .2s ease, transform .06s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .meta-card:hover {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, rgba(78,161,255,0.08) 0%, rgba(255,255,255,0.025) 100%);
+    }
+
+    .meta-card:active {
+      transform: translateY(1px);
+    }
+
+    .meta-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(78, 161, 255, 0.12);
+      background: linear-gradient(180deg, rgba(78,161,255,0.12) 0%, rgba(255,255,255,0.03) 100%);
+    }
+
+    .meta-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .meta-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .meta-trigger {
+      margin: 0;
+      color: var(--accent-2);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .meta-prompt {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0d131b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #eaf2fb;
+      font-size: 0.94rem;
+    }
+
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .prompt-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .prompt-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .prompt-type {
+      margin: 0;
+      font-size: 0.98rem;
+      color: #d7e3ef;
+    }
+
+    .copy-btn {
+      flex: 0 0 auto;
+      background: transparent;
+      color: var(--accent-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      min-width: 92px;
+      min-height: 42px;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: white;
+      background: rgba(78, 161, 255, 0.12);
+    }
+
+    .prompt-text {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #0d131b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #eaf2fb;
+      font-size: 0.95rem;
+    }
+
+    .hidden { display: none !important; }
+
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (min-width: 700px) {
+      .container {
+        padding: 28px 20px 56px;
+      }
+
+      h1 { font-size: 2rem; }
+
+      .toolbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .prompt-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .prompt-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>MetaPrompter</h1>
+      <p class="subtitle">Je AI-denkpartner: 20 prompts die je helpen scherper te denken en betere beslissingen te nemen.</p>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <div class="hint">Gebruik in ChatGPT, Claude of andere AI-systemen. Kies eerst een meta-kaartje voor je denkrichting, daarna een prompt om je vraag te concretiseren en tot inzichten of acties te komen.</div>
+        <div class="actions">
+          <button class="btn" onclick="clearSearch()">Wis zoekveld</button>
+        </div>
+      </div>
+
+      <div class="searchbar">
+        <div id="activeFilterBar" class="search-meta hidden" style="margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span id="activeFilterText">Filter actief</span>
+          <button class="btn" style="min-height:36px; padding:8px 12px;" onclick="resetCategoryFilter()">Reset filter</button>
+        </div>
+        <label for="promptSearch">🔍 Zoek prompt</label>
+        <input id="promptSearch" type="search" placeholder="Zoek op categorie, prompttype of tekst..." oninput="filterPrompts()" />
+        <div id="searchMeta" class="search-meta">20 van 20 prompts zichtbaar</div>
+      </div>
+
+      <section class="category-section" data-category="analyse">
+        <div class="category-header">
+          <h2 class="category-title analyse">🧠 Analyse &amp; Begrip</h2>
+          <div class="category-count"><span class="visible-count">5</span> zichtbaar</div>
+        </div>
+
+        <div class="meta-card" onclick="toggleCategoryFilter(this.closest('section').dataset.category)">
+          <div class="meta-top">
+            <div>
+              <div class="meta-label">Meta-kaartje</div>
+              <p class="meta-trigger">“Ik moet eerst begrijpen.”</p>
+            </div>
+            <button class="copy-btn" onclick="copyPrompt('meta-prompt-1', this)">Kopieer</button>
+          </div>
+          <p id="meta-prompt-1" class="meta-prompt">Gedraag je als een analytisch denker. Help me dit probleem volledig te doorgronden voordat je oplossingen geeft. Maak aannames expliciet, stel verdiepende vragen en breng de belangrijkste verbanden in kaart.</p>
+        </div>
+
+        <div class="prompt-grid">
+          <article class="prompt-card" data-search="analyse begrip strategische inzichten consultant waardevolle inzichten beslissingen">
+            <div class="prompt-top">
+              <h3 class="prompt-type">1. Strategische inzichten</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-1', this)">Kopieer</button>
+            </div>
+            <p id="prompt-1" class="prompt-text">Gedraag je als een strategieconsultant. Identificeer de 5 meest waardevolle inzichten en leg uit welke beslissingen elk inzicht beïnvloedt.</p>
+          </article>
+          <article class="prompt-card" data-search="analyse begrip aannames blootleggen blinde vlekken argument">
+            <div class="prompt-top">
+              <h3 class="prompt-type">2. Aannames blootleggen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-2', this)">Kopieer</button>
+            </div>
+            <p id="prompt-2" class="prompt-text">Maak de impliciete aannames of blinde vlekken in dit argument zichtbaar – en wat verandert er als ze onjuist zijn?</p>
+          </article>
+          <article class="prompt-card" data-search="analyse begrip perspectieven vergelijken tegengestelde perspectieven context">
+            <div class="prompt-top">
+              <h3 class="prompt-type">3. Perspectieven vergelijken</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-3', this)">Kopieer</button>
+            </div>
+            <p id="prompt-3" class="prompt-text">Vergelijk dit idee vanuit twee tegengestelde perspectieven. Laat zien waar ze overeenkomen, waar ze verschillen en in welke context elk perspectief klopt.</p>
+          </article>
+          <article class="prompt-card" data-search="analyse begrip oorzaken gevolgen symptoom kernprobleem">
+            <div class="prompt-top">
+              <h3 class="prompt-type">4. Oorzaken en gevolgen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-4', this)">Kopieer</button>
+            </div>
+            <p id="prompt-4" class="prompt-text">Wat zijn de 3 belangrijkste oorzaken en 3 mogelijke gevolgen van dit onderwerp? Maak onderscheid tussen symptoom en kernprobleem.</p>
+          </article>
+          <article class="prompt-card" data-search="analyse begrip onderliggende mechanismen samenhang probleem">
+            <div class="prompt-top">
+              <h3 class="prompt-type">5. Onderliggende mechanismen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-5', this)">Kopieer</button>
+            </div>
+            <p id="prompt-5" class="prompt-text">Welke onderliggende mechanismen sturen dit probleem, en hoe beïnvloeden ze elkaar in samenhang?</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="category-section" data-category="actie">
+        <div class="category-header">
+          <h2 class="category-title actie">⚡ Actie &amp; Besluitvorming</h2>
+          <div class="category-count"><span class="visible-count">5</span> zichtbaar</div>
+        </div>
+
+        <div class="meta-card" onclick="toggleCategoryFilter(this.closest('section').dataset.category)">
+          <div class="meta-top">
+            <div>
+              <div class="meta-label">Meta-kaartje</div>
+              <p class="meta-trigger">“Ik moet nu kiezen en doen.”</p>
+            </div>
+            <button class="copy-btn" onclick="copyPrompt('meta-prompt-2', this)">Kopieer</button>
+          </div>
+          <p id="meta-prompt-2" class="meta-prompt">Gedraag je als een resultaatgerichte adviseur. Vertaal dit naar concrete acties, help me prioriteiten stellen en benoem de eerstvolgende stappen met het meeste effect.</p>
+        </div>
+
+        <div class="prompt-grid">
+          <article class="prompt-card" data-search="actie besluitvorming info naar actie stappenplan eigenaars quick wins resultaten">
+            <div class="prompt-top">
+              <h3 class="prompt-type">1. Van info naar actie</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-6', this)">Kopieer</button>
+            </div>
+            <p id="prompt-6" class="prompt-text">Vertaal dit naar een 5-stappenplan met duidelijke eigenaars, quick wins en meetbare resultaten.</p>
+          </article>
+          <article class="prompt-card" data-search="actie besluitvorming leverage hefboompunten kleine acties impact">
+            <div class="prompt-top">
+              <h3 class="prompt-type">2. Leverage points identificeren</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-7', this)">Kopieer</button>
+            </div>
+            <p id="prompt-7" class="prompt-text">Identificeer de 3 hefboompunten waar kleine acties grote impact hebben. Leg uit waarom deze belangrijk zijn.</p>
+          </article>
+          <article class="prompt-card" data-search="actie besluitvorming eerstvolgende beste actie 30 dagen">
+            <div class="prompt-top">
+              <h3 class="prompt-type">3. Eerstvolgende beste actie</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-8', this)">Kopieer</button>
+            </div>
+            <p id="prompt-8" class="prompt-text">Wat is de eerstvolgende beste actie die ik nu kan nemen, en wat levert die binnen 30 dagen concreet op?</p>
+          </article>
+          <article class="prompt-card" data-search="actie besluitvorming beslisopties risico voordelen vooruitgang">
+            <div class="prompt-top">
+              <h3 class="prompt-type">4. Beslisopties verkennen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-9', this)">Kopieer</button>
+            </div>
+            <p id="prompt-9" class="prompt-text">Welke beslissingen moet ik nemen om vooruitgang te boeken, en wat zijn de risico’s en voordelen per optie?</p>
+          </article>
+          <article class="prompt-card" data-search="actie besluitvorming optimaliseren snelheid impact anders doen">
+            <div class="prompt-top">
+              <h3 class="prompt-type">5. Optimaliseren voor impact</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-10', this)">Kopieer</button>
+            </div>
+            <p id="prompt-10" class="prompt-text">Als je dit zou optimaliseren voor snelheid én impact, wat zou je anders doen?</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="category-section" data-category="context">
+        <div class="category-header">
+          <h2 class="category-title context">🎯 Context &amp; Toepassing</h2>
+          <div class="category-count"><span class="visible-count">5</span> zichtbaar</div>
+        </div>
+
+        <div class="meta-card" onclick="toggleCategoryFilter(this.closest('section').dataset.category)">
+          <div class="meta-top">
+            <div>
+              <div class="meta-label">Meta-kaartje</div>
+              <p class="meta-trigger">“Wat betekent dit voor mij?”</p>
+            </div>
+            <button class="copy-btn" onclick="copyPrompt('meta-prompt-3', this)">Kopieer</button>
+          </div>
+          <p id="meta-prompt-3" class="meta-prompt">Gedraag je als een adviseur die denkt vanuit mijn situatie. Vertaal dit naar mijn context, maak het praktisch toepasbaar en geef voorbeelden die passen bij mijn werkelijkheid.</p>
+        </div>
+
+        <div class="prompt-grid">
+          <article class="prompt-card" data-search="context toepassing rol specifieke vertaling lens rol kern belangrijkst">
+            <div class="prompt-top">
+              <h3 class="prompt-type">1. Rol-specifieke vertaling</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-11', this)">Kopieer</button>
+            </div>
+            <p id="prompt-11" class="prompt-text">Bekijk dit door de lens van een [rol]. Filter de kern en benadruk wat voor deze rol het belangrijkst is.</p>
+          </article>
+          <article class="prompt-card" data-search="context toepassing beginner expert verschillen focus diepgang">
+            <div class="prompt-top">
+              <h3 class="prompt-type">2. Beginner vs expert</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-12', this)">Kopieer</button>
+            </div>
+            <p id="prompt-12" class="prompt-text">Hoe zou een beginner dit begrijpen versus een expert? Benoem de verschillen in focus en diepgang.</p>
+          </article>
+          <article class="prompt-card" data-search="context toepassing contextverschuiving individu team organisatie markt">
+            <div class="prompt-top">
+              <h3 class="prompt-type">3. Contextverschuiving</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-13', this)">Kopieer</button>
+            </div>
+            <p id="prompt-13" class="prompt-text">Hoe verandert de betekenis van dit idee in verschillende contexten, zoals individu, team, organisatie of markt?</p>
+          </article>
+          <article class="prompt-card" data-search="context toepassing praktische toepassing dagelijkse werk voorbeelden situaties">
+            <div class="prompt-top">
+              <h3 class="prompt-type">4. Praktische toepassing</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-14', this)">Kopieer</button>
+            </div>
+            <p id="prompt-14" class="prompt-text">Vertaal dit naar een praktische toepassing in mijn dagelijkse werk. Geef concrete voorbeelden en situaties.</p>
+          </article>
+          <article class="prompt-card" data-search="context toepassing doelgroep fit kenmerken omstandigheden werkt wel niet">
+            <div class="prompt-top">
+              <h3 class="prompt-type">5. Doelgroep-fit beoordelen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-15', this)">Kopieer</button>
+            </div>
+            <p id="prompt-15" class="prompt-text">Voor wie werkt dit wel en voor wie niet? Leg uit welke kenmerken of omstandigheden daarbij bepalend zijn.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="category-section" data-category="structuur">
+        <div class="category-header">
+          <h2 class="category-title structuur">🔁 Structuur &amp; Vernieuwing</h2>
+          <div class="category-count"><span class="visible-count">5</span> zichtbaar</div>
+        </div>
+
+        <div class="meta-card" onclick="toggleCategoryFilter(this.closest('section').dataset.category)">
+          <div class="meta-top">
+            <div>
+              <div class="meta-label">Meta-kaartje</div>
+              <p class="meta-trigger">“Hoe maak ik dit herhaalbaar of beter?”</p>
+            </div>
+            <button class="copy-btn" onclick="copyPrompt('meta-prompt-4', this)">Kopieer</button>
+          </div>
+          <p id="meta-prompt-4" class="meta-prompt">Gedraag je als een systeemdenker. Haal patronen en principes uit dit idee en help me dit om te zetten in een schaalbaar model of een vernieuwende combinatie.</p>
+        </div>
+
+        <div class="prompt-grid">
+          <article class="prompt-card" data-search="structuur vernieuwing herhaalbaar model framework input proces output">
+            <div class="prompt-top">
+              <h3 class="prompt-type">1. Herhaalbaar model bouwen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-16', this)">Kopieer</button>
+            </div>
+            <p id="prompt-16" class="prompt-text">Haal het herhaalbare framework uit deze tekst. Benoem elke stap, inclusief input, proces en output.</p>
+          </article>
+          <article class="prompt-card" data-search="structuur vernieuwing contrarian inzichten conventionele wijsheid one liners">
+            <div class="prompt-top">
+              <h3 class="prompt-type">2. Contrarian inzichten</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-17', this)">Kopieer</button>
+            </div>
+            <p id="prompt-17" class="prompt-text">Geef inzichten die ingaan tegen conventionele wijsheid – geloofwaardig maar onverwacht. Formuleer ze als scherpe one-liners.</p>
+          </article>
+          <article class="prompt-card" data-search="structuur vernieuwing patronen herkennen principes hergebruiken situaties">
+            <div class="prompt-top">
+              <h3 class="prompt-type">3. Patronen herkennen</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-18', this)">Kopieer</button>
+            </div>
+            <p id="prompt-18" class="prompt-text">Welke patronen of principes komen hier steeds terug, en hoe kan ik die hergebruiken in andere situaties?</p>
+          </article>
+          <article class="prompt-card" data-search="structuur vernieuwing vereenvoudigen model overdraagbaar uitlegbaar schaalbaar">
+            <div class="prompt-top">
+              <h3 class="prompt-type">4. Vereenvoudigen tot model</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-19', this)">Kopieer</button>
+            </div>
+            <p id="prompt-19" class="prompt-text">Hoe kun je dit vereenvoudigen tot een model dat makkelijk overdraagbaar, uitlegbaar en schaalbaar is?</p>
+          </article>
+          <article class="prompt-card" data-search="structuur vernieuwing innovatieve combinatie ideeën innovatie">
+            <div class="prompt-top">
+              <h3 class="prompt-type">5. Innovatieve combinatie</h3>
+              <button class="copy-btn" onclick="copyPrompt('prompt-20', this)">Kopieer</button>
+            </div>
+            <p id="prompt-20" class="prompt-text">Welke nieuwe combinatie van ideeën zou hieruit kunnen ontstaan die tot vernieuwing of innovatie leidt?</p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">v1.1 · april 2026 · TL4E</div>
+  </div>
+
+  <script>
+    async function copyText(text, button) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = button.textContent;
+        button.textContent = 'Gekopieerd';
+        button.style.borderColor = 'var(--success)';
+        button.style.color = 'var(--success)';
+        setTimeout(() => {
+          button.textContent = original;
+          button.style.borderColor = 'var(--border)';
+          button.style.color = 'var(--accent-2)';
+        }, 1400);
+      } catch (err) {
+        alert('Kopiëren is niet gelukt in deze browserweergave.');
+      }
+    }
+
+    function copyPrompt(id, button) {
+      const text = document.getElementById(id).innerText;
+      copyText(text, button);
+    }
+
+    function normalizeText(value) {
+      return (value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/&/g, ' en ')
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function buildSearchIndex() {
+      const cards = Array.from(document.querySelectorAll('.prompt-card'));
+      cards.forEach(card => {
+        const indexedText = [
+          card.getAttribute('data-search') || '',
+          card.innerText || '',
+          card.textContent || ''
+        ].join(' ');
+        card.dataset.searchIndex = normalizeText(indexedText);
+      });
+    }
+
+    let activeCategoryFilter = null;
+
+    function clearSearch() {
+      const input = document.getElementById('promptSearch');
+      input.value = '';
+      filterPrompts();
+      input.focus();
+    }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        analyse: '🧠 Analyse & Begrip',
+        actie: '⚡ Actie & Besluitvorming',
+        context: '🎯 Context & Toepassing',
+        structuur: '🔁 Structuur & Vernieuwing'
+      };
+      return labels[category] || category;
+    }
+
+    function toggleCategoryFilter(category) {
+      activeCategoryFilter = activeCategoryFilter === category ? null : category;
+      filterPrompts();
+    }
+
+    function resetCategoryFilter() {
+      activeCategoryFilter = null;
+      filterPrompts();
+    }
+
+    function filterPrompts() {
+      const input = document.getElementById('promptSearch');
+      const meta = document.getElementById('searchMeta');
+      const sections = Array.from(document.querySelectorAll('.category-section'));
+      const cards = Array.from(document.querySelectorAll('.prompt-card'));
+      const filterBar = document.getElementById('activeFilterBar');
+      const filterText = document.getElementById('activeFilterText');
+      const term = normalizeText(input.value || '');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const haystack = card.dataset.searchIndex || normalizeText(card.innerText || '');
+        const section = card.closest('.category-section');
+        const category = section?.dataset.category;
+        const matchesSearch = !term || haystack.includes(term);
+        const matchesCategory = !activeCategoryFilter || category === activeCategoryFilter;
+        const match = matchesSearch && matchesCategory;
+        card.classList.toggle('hidden', !match);
+        if (match) visible += 1;
+      });
+
+      sections.forEach(section => {
+        const visibleCards = section.querySelectorAll('.prompt-card:not(.hidden)').length;
+        const metaCard = section.querySelector('.meta-card');
+        const isActive = activeCategoryFilter === section.dataset.category;
+
+        section.querySelector('.visible-count').textContent = visibleCards;
+        section.classList.toggle('hidden', visibleCards === 0 && !!term || (!!activeCategoryFilter && section.dataset.category !== activeCategoryFilter));
+
+        if (metaCard) {
+          metaCard.classList.toggle('active', isActive);
+        }
+      });
+
+      if (activeCategoryFilter) {
+        filterBar.classList.remove('hidden');
+        filterText.textContent = `Filter actief: ${getCategoryLabel(activeCategoryFilter)}`;
+      } else {
+        filterBar.classList.add('hidden');
+      }
+
+      meta.textContent = `${visible} van ${cards.length} prompts zichtbaar`;
+    }
+
+    buildSearchIndex();
+    filterPrompts();
+  </script>
+</body>
+</html>
