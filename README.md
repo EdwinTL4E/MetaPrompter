@@ -2,15 +2,15 @@ MetaPrompter is een tool die je helpt betere vragen te stellen aan AI, zodat je 
 
 Doel: Structuur geven aan je denken en besluitvorming.
 
-Werking
-Kies een denkrichting (bijv. analyse, actie, context, structuur).
-Selecteer een passende prompt.
-Gebruik deze in een AI-tool.
+Werking:
+1. Kies een denkrichting (bijv. analyse, actie, context, structuur).
+2. Selecteer een passende prompt.
+3. Gebruik deze in een AI-tool.
+
 Functionaliteiten
-Zoekfunctie en filters
-20 prompts verdeeld over 4 categorieën
-Direct kopiëren van prompts
-Gebruik
+- Zoekfunctie en filters
+- 20 prompts verdeeld over 4 categorieën
+- Direct kopiëren van prompts
 
 Geschikt voor analyse, besluitvorming en praktische toepassing van ideeën.
 
